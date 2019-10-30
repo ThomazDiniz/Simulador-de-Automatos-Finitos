@@ -29,6 +29,7 @@ def readInputFile():
                     formalDef[TRANSITIONS][currentState][symbol] = [nextState]
             else:
                 formalDef[TRANSITIONS][currentState] = {symbol: [nextState]}
+    formalDef[INITIAL] = formalDef[INITIAL][0]
 
 # simulate() simulate the automaton specified in the formatDef object
 # when it reads the word given in the sys argument and returns a list
@@ -36,10 +37,10 @@ def readInputFile():
 def simulate():
     word = sys.argv[2]
     toProcess = deque([])
-    toProcess.append(formalDef[INITIAL][0])
+    toProcess.append(formalDef[INITIAL])
 
     print 'ESTADO', '\t', 'PALAVRA'
-    print formalDef[INITIAL][0], '\t', word
+    print formalDef[INITIAL], '\t', word
     while(len(word) > 0):
         currentState = toProcess.popleft()
         symbol = word[0]
