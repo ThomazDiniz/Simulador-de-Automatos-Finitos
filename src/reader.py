@@ -19,7 +19,7 @@ def readInputFile():
 
         args = line.strip().split(' ', 1)
         if(args[0] in formalDef):
-            formalDef[args[0]] = args[1].split(',')
+            formalDef[args[0]] = args[1].split(', ')
         else:
             currentState, nextState, symbol = line.strip().split(' ')
             if (formalDef[TRANSITIONS].has_key(currentState)):
@@ -58,3 +58,14 @@ def showVeredict(states):
     for state in states:
         if (state in formalDef[ACCEPT]): accept = True
     print '\nA palavra %sfoi aceita' % ('nao ' if not accept else '')
+
+# generateComplement(formalDef) generate the complement automaton for the
+# automaton received in the param. It returns a formal definition for the
+# complement automaton.
+def generateComplement(formalDef):
+    complementDef = {}
+    complementDef[INITIAL] = formalDef[INITIAL]
+    complementDef[TRANSITIONS] = formalDef[TRANSITIONS].copy()
+    complementDef[STATES] = formalDef[STATES][:]
+    complementDef[ACCEPT] = list(set(formalDef[STATES]) - set(formalDef[ACCEPT]))
+    return complementDef
