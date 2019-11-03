@@ -86,6 +86,69 @@ def writeOutputFile(formalDef):
                 automataAsStr += '\n'
     print(automataAsStr)
 
+#traverse(formalDef,state,symbol) traverses through the automata and returns all the states it should be after the input is set
 def traverse(formalDef,state,symbol):
-    return formalDef[TRANSITIONS][state][symbol]
+    if state in formalDef[TRANSITIONS]:
+        if symbol in formalDef[TRANSITIONS][state]:
+            return formalDef[TRANSITIONS][state][symbol]
+    return []
 
+#traverse(formalDef,state,symbol) traverses through the automata and returns all the states it should be after all the inputs are set
+#the difference from this to the other is that it receives multiple states
+def traverseMultipleStates(formalDef,states,symbol):
+    finalStates = []
+    for state in states:
+        if state in formalDef[TRANSITIONS]:
+            if symbol in formalDef[TRANSITIONS][state]:
+                finalStates = finalStates + formalDef[TRANSITIONS][state][symbol]
+    return finalStates
+
+def nfaToDfa(formalDef):
+    newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
+    
+    #CREATE STATE COMBINATIONS (from each state)
+    states = formalDef[STATES]
+    stateCombinations = []
+    newStates = []
+    for i in range(len(states)+1):
+        combinations = set(itertools.combinations(states,i))
+        for comb in combinations:
+            stateCombinations.append(comb)
+
+    for states in stateCombinations:
+        newStates.append("_".join(str(state) for state in states))
+    newFormalDef[STATES] = newStates
+
+    #SET ACCEPTING STATES (for every state accept the ones that has at least one accepting state)
+    accepting_states = formalDef[ACCEPT]
+    newAccepting_states = []
+
+    for states in stateCombinations:
+        for accept_state in accepting_states:
+            if accept_state in states:
+                newAccepting_states.append("_".join(str(state) for state in states))
+
+    newAccepting_states = set(newAccepting_states)
+    newFormalDef[ACCEPT] = newAccepting_states
+
+    #SET INITIAL STATE (from the initial state traverse all 'e' symbols until you can't you get the most states. The initial state is a combination of every single starting state)
+    initial = formalDef[INITIAL]
+    newInitial = [initial]
+    newInitialPrevious = []
+    while True:
+        newInitial = set(newInitial).union(set(traverseMultipleStates(formalDef,newInitial,'e')))
+        if newInitial == newInitialPrevious:
+            break
+        newInitialPrevious = newInitial
+
+    for comb in stateCombinations:
+        if newInitial == set(comb):
+            combInitial = comb
+            newInitial = "_".join(str(state) for state in comb)
+            break
+            
+    return newFormalDef
+
+
+readInputFile()
+nfaToDfa(formalDef)
