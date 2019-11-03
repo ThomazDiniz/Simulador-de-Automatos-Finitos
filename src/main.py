@@ -86,13 +86,15 @@ def writeOutputFile(formalDef):
                 automataAsStr += '\n'
     print(automataAsStr)
 
-#traverse(formalDef,state,symbol) traverses through the automata and returns all the states it should be after the input is set
+#traverse(formalDef,state,symbol) traverses through the automata 
+#and returns all the states it should be after the input is set
 def traverse(formalDef,state,symbol):
     if state in formalDef[TRANSITIONS]:
         if symbol in formalDef[TRANSITIONS][state]:
             return formalDef[TRANSITIONS][state][symbol]
     return []
-#traverse(formalDef,state,symbol) traverses through the automata and returns all the states it should be after all the inputs are set
+#traverse(formalDef,state,symbol) traverses through the automata 
+#and returns all the states it should be after all the inputs are set
 #the difference from this to traverse is that it receives multiple states
 def traverseMultipleStates(formalDef,states,symbol):
     finalStates = []
@@ -103,7 +105,9 @@ def traverseMultipleStates(formalDef,states,symbol):
     return finalStates
 
 
-#traverseIndefinitely(formalDef,state,symbol) traverse indefinitely using a symbol. It only stops when the states set doesnt change after a traverse
+#traverseIndefinitely(formalDef,state,symbol) traverse indefinitely 
+#using a symbol. It only stops when the set of states
+#doesn't change after a traverse
 def traverseIndefinitely(formalDef,states, symbol):
     previousStates = []
     while True:
@@ -120,7 +124,8 @@ def nfaTraverse(formalDef,states, symbol):
     states = traverseIndefinitely(formalDef,states,'e')
     return states
 
-#findStateFromStateCombinaton(stateCombinations,combination) is an auxiliar method to build a state string from a combination of states
+#findStateFromStateCombinaton(stateCombinations,combination) is an auxiliar 
+#method to build a state string from a combination of states
 def findStateFromStateCombinaton(stateCombinations,combination):
     foundCombination = ""
     for comb in stateCombinations:
@@ -138,6 +143,7 @@ def getAlphabet(formalDef):
     alphabet.discard('e')
     return alphabet
 
+#nfaToDfa(formalDef) build a dfa from a nfa
 def nfaToDfa(formalDef):
     newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     
@@ -189,4 +195,4 @@ def nfaToDfa(formalDef):
     return newFormalDef
 
 readInputFile()
-nfaToDfa(formalDef)
+print(nfaToDfa(formalDef))
