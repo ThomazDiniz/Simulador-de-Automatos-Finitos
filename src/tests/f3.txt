@@ -1,4 +1,4 @@
-estados A B C
+estados A, B, C
 inicial A
 aceita B
 A A 0

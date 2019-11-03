@@ -1,6 +1,6 @@
 estados A, B
 inicial A
-aceita B
+aceita B, A
 A B 0
 B A 0
 A A 1
