@@ -22,8 +22,8 @@ def readInputFile():
             formalDef[args[0]] = args[1].split(', ')
         else:
             currentState, nextState, symbol = line.strip().split(' ')
-            if (formalDef[TRANSITIONS].has_key(currentState)):
-                if (formalDef[TRANSITIONS].has_key(symbol)):
+            if currentState in formalDef[TRANSITIONS]:
+                if (symbol in formalDef[TRANSITIONS]):
                     formalDef[TRANSITIONS][currentState][symbol].append(nextState)
                 else:
                     formalDef[TRANSITIONS][currentState][symbol] = [nextState]
@@ -39,15 +39,15 @@ def simulate():
     toProcess = deque([])
     toProcess.append(formalDef[INITIAL])
 
-    print 'ESTADO', '\t', 'PALAVRA'
-    print formalDef[INITIAL], '\t', word
+    print('ESTADO', '\t', 'PALAVRA')
+    print(formalDef[INITIAL], '\t', word)
     while(len(word) > 0):
         currentState = toProcess.popleft()
         symbol = word[0]
         word = word[1:len(word)]
         for nextState in formalDef[TRANSITIONS][currentState][symbol]:
             toProcess.append(nextState)
-            print nextState, '\t', word if len(word) > 0 else 'e'
+            print(nextState, '\t', word if len(word) > 0 else 'e')
     showVeredict(toProcess)
     
 # showVeredict() receives a list with the states the automaton stops
@@ -57,7 +57,7 @@ def showVeredict(states):
     accept = False
     for state in states:
         if (state in formalDef[ACCEPT]): accept = True
-    print '\nA palavra %sfoi aceita' % ('nao ' if not accept else '')
+    print('\nA palavra %sfoi aceita' % ('nao ' if not accept else ''))
 
 # generateComplement(formalDef) generate the complement automaton for the
 # automaton received in the param. It returns a formal definition for the
@@ -69,3 +69,5 @@ def generateComplement(formalDef):
     complementDef[STATES] = formalDef[STATES][:]
     complementDef[ACCEPT] = list(set(formalDef[STATES]) - set(formalDef[ACCEPT]))
     return complementDef
+
+
