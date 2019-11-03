@@ -187,12 +187,21 @@ def nfaToDfa(formalDef):
             newState = '_'.join(str(state) for state in states)
             newResultStates = nfaTraverse(formalDef,states,symbol)
             newResultState = findStateFromStateCombinaton(stateCombinations,newResultStates)
-            try:
-                newFormalDef[TRANSITIONS][newState][symbol] = [newResultState]
-            except KeyError:
-                newFormalDef[TRANSITIONS][newState] = {symbol: [newResultState]}
-    
+            automataAddTransiton(newFormalDef,newState,symbol,newResultState)    
     return newFormalDef
+
+#automataAddTransiton(formalDef,state,symbol,resultState) adds a 
+#transition to an automata even if it doesn't have that key
+def automataAddTransiton(formalDef,state,symbol,resultState):
+    try:
+        if symbol in formalDef[TRANSITIONS][state]:
+            formalDef[TRANSITIONS][state][symbol].append(resultState)
+        else:
+            formalDef[TRANSITIONS][state][symbol] = resultState    
+    except KeyError:
+        formalDef[TRANSITIONS][state] = {symbol: [resultState]}
+    
+
 
 readInputFile()
 print(nfaToDfa(formalDef))
