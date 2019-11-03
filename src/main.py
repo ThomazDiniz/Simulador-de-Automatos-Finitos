@@ -71,3 +71,16 @@ def generateComplement(formalDef):
     return complementDef
 
 
+
+# writeOutputFile(formalDef) writes an automaton to the default output
+def writeOutputFile(formalDef):
+    automataAsStr = STATES   +  ' '  + ', '.join(str(state) for state in formalDef[STATES]) + '\n'
+    automataAsStr += INITIAL +  ' '  + formalDef[INITIAL] + '\n'
+    automataAsStr += ACCEPT  +  ' '  + ', '.join(str(state) for state in formalDef[ACCEPT]) + '\n'
+    transitions = formalDef[TRANSITIONS]
+    for state in transitions:
+        for symbol in transitions[state]:
+            for nextState in transitions[state][symbol]:
+                automataAsStr += state + ' ' + nextState + ' ' + symbol
+                automataAsStr += '\n'
+    print(automataAsStr)
