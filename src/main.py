@@ -92,9 +92,8 @@ def traverse(formalDef,state,symbol):
         if symbol in formalDef[TRANSITIONS][state]:
             return formalDef[TRANSITIONS][state][symbol]
     return []
-
 #traverse(formalDef,state,symbol) traverses through the automata and returns all the states it should be after all the inputs are set
-#the difference from this to the other is that it receives multiple states
+#the difference from this to traverse is that it receives multiple states
 def traverseMultipleStates(formalDef,states,symbol):
     finalStates = []
     for state in states:
@@ -103,6 +102,42 @@ def traverseMultipleStates(formalDef,states,symbol):
                 finalStates = finalStates + formalDef[TRANSITIONS][state][symbol]
     return finalStates
 
+
+#traverseIndefinitely(formalDef,state,symbol) traverse indefinitely using a symbol. It only stops when the states set doesnt change after a traverse
+def traverseIndefinitely(formalDef,states, symbol):
+    previousStates = []
+    while True:
+        states = set(states).union(set(traverseMultipleStates(formalDef,states,symbol)))
+        if states == previousStates:
+            break
+        previousStates = states
+    return states
+
+#nfaTraverse(formalDef,states, symbol) traverses as it would in a nfa
+def nfaTraverse(formalDef,states, symbol):
+    states = traverseIndefinitely(formalDef,states,'e')
+    states = traverseMultipleStates(formalDef,states,symbol)
+    states = traverseIndefinitely(formalDef,states,'e')
+    return states
+
+#findStateFromStateCombinaton(stateCombinations,combination) is an auxiliar method to build a state string from a combination of states
+def findStateFromStateCombinaton(stateCombinations,combination):
+    foundCombination = ""
+    for comb in stateCombinations:
+        if combination == set(comb):
+            foundCombination = "_".join(str(state) for state in comb)
+            break
+    return foundCombination
+
+#getAlphabet(formalDef) get all the symbols of an automata
+def getAlphabet(formalDef):
+    alphabet = set()
+    for state in formalDef[TRANSITIONS]:
+        for symbol in formalDef[TRANSITIONS][state]:
+            alphabet.add(symbol)
+    alphabet.discard('e')
+    return alphabet
+
 def nfaToDfa(formalDef):
     newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     
@@ -110,7 +145,7 @@ def nfaToDfa(formalDef):
     states = formalDef[STATES]
     stateCombinations = []
     newStates = []
-    for i in range(len(states)+1):
+    for i in range(1,len(states)+1):
         combinations = set(itertools.combinations(states,i))
         for comb in combinations:
             stateCombinations.append(comb)
@@ -133,22 +168,25 @@ def nfaToDfa(formalDef):
 
     #SET INITIAL STATE (from the initial state traverse all 'e' symbols until you can't you get the most states. The initial state is a combination of every single starting state)
     initial = formalDef[INITIAL]
-    newInitial = [initial]
-    newInitialPrevious = []
-    while True:
-        newInitial = set(newInitial).union(set(traverseMultipleStates(formalDef,newInitial,'e')))
-        if newInitial == newInitialPrevious:
-            break
-        newInitialPrevious = newInitial
-
-    for comb in stateCombinations:
-        if newInitial == set(comb):
-            combInitial = comb
-            newInitial = "_".join(str(state) for state in comb)
-            break
-            
+    newInitial = traverseIndefinitely(formalDef,initial,'e')
+    newFormalDef[INITIAL] = findStateFromStateCombinaton(stateCombinations,newInitial)
+    
+    
+    #SET TRANSITIONS
+    alphabet = getAlphabet(formalDef)
+    transitions = formalDef[TRANSITIONS]
+    for symbol in alphabet:
+        print(symbol)
+        for states in stateCombinations:
+            newState = '_'.join(str(state) for state in states)
+            newResultStates = nfaTraverse(formalDef,states,symbol)
+            newResultState = findStateFromStateCombinaton(stateCombinations,newResultStates)
+            try:
+                newFormalDef[TRANSITIONS][newState][symbol] = [newResultState]
+            except KeyError:
+                newFormalDef[TRANSITIONS][newState] = {symbol: [newResultState]}
+    
     return newFormalDef
-
 
 readInputFile()
 nfaToDfa(formalDef)
