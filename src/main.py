@@ -1,4 +1,5 @@
 import sys
+import itertools
 from collections import deque
 
 ACCEPT      = 'aceita'
@@ -22,8 +23,9 @@ def readInputFile():
             formalDef[args[0]] = args[1].split(', ')
         else:
             currentState, nextState, symbol = line.strip().split(' ')
+            print(line)
             if currentState in formalDef[TRANSITIONS]:
-                if (symbol in formalDef[TRANSITIONS]):
+                if (symbol in formalDef[TRANSITIONS][currentState]):
                     formalDef[TRANSITIONS][currentState][symbol].append(nextState)
                 else:
                     formalDef[TRANSITIONS][currentState][symbol] = [nextState]
