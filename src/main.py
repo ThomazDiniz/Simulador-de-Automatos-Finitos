@@ -86,3 +86,7 @@ def writeOutputFile(formalDef):
                 automataAsStr += state + ' ' + nextState + ' ' + symbol
                 automataAsStr += '\n'
     print(automataAsStr)
+
+def traverse(formalDef,state,symbol):
+    return formalDef[TRANSITIONS][state][symbol]
+
