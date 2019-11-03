@@ -2,6 +2,8 @@ estados A, B
 inicial A
 aceita B, A
 A B 0
+A C 0
+A D 0
 B A 0
 A A 1
 B B 1
