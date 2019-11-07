@@ -32,6 +32,7 @@ def readInputFile():
                 formalDef[TRANSITIONS][currentState] = {symbol: [nextState]}
     formalDef[INITIAL] = formalDef[INITIAL][0]
 
+
 # simulate() simulate the automaton specified in the formatDef object
 # when it reads the word given in the sys argument and returns a list
 # with the states where the automaton stops at the end of the word.
@@ -42,15 +43,17 @@ def simulate():
 
     print('ESTADO', '\t', 'PALAVRA')
     print(formalDef[INITIAL], '\t', word)
-    while(len(word) > 0):
+    while(len(word) > 0 and len(toProcess) > 0):
         currentState = toProcess.popleft()
         symbol = word[0]
         word = word[1:len(word)]
-        for nextState in formalDef[TRANSITIONS][currentState][symbol]:
-            toProcess.append(nextState)
-            print(nextState, '\t', word if len(word) > 0 else 'e')
+        if (symbol in formalDef[TRANSITIONS][currentState]):
+            for nextState in formalDef[TRANSITIONS][currentState][symbol]:
+                toProcess.append(nextState)
+                print(nextState, '\t', word if len(word) > 0 else 'e')
     showVeredict(toProcess)
-    
+
+
 # showVeredict() receives a list with the states the automaton stops
 # at the end of a word and verifies if one of them is an accept state
 # and shows a message according to it.
@@ -59,6 +62,7 @@ def showVeredict(states):
     for state in states:
         if (state in formalDef[ACCEPT]): accept = True
     print('\nA palavra %sfoi aceita' % ('nao ' if not accept else ''))
+
 
 # generateComplement(formalDef) generate the complement automaton for the
 # automaton received in the param. It returns a formal definition for the
@@ -70,7 +74,6 @@ def generateComplement(formalDef):
     complementDef[STATES] = formalDef[STATES][:]
     complementDef[ACCEPT] = list(set(formalDef[STATES]) - set(formalDef[ACCEPT]))
     return complementDef
-
 
 
 # writeOutputFile(formalDef) writes an automaton to the default output
@@ -86,6 +89,7 @@ def writeOutputFile(formalDef):
                 automataAsStr += '\n'
     print(automataAsStr)
 
+
 #traverse(formalDef,state,symbol) traverses through the automata 
 #and returns all the states it should be after the input is set
 def traverse(formalDef,state,symbol):
@@ -93,6 +97,8 @@ def traverse(formalDef,state,symbol):
         if symbol in formalDef[TRANSITIONS][state]:
             return formalDef[TRANSITIONS][state][symbol]
     return []
+
+
 #traverse(formalDef,state,symbol) traverses through the automata 
 #and returns all the states it should be after all the inputs are set
 #the difference from this to traverse is that it receives multiple states
@@ -117,12 +123,14 @@ def traverseIndefinitely(formalDef,states, symbol):
         previousStates = states
     return states
 
+
 #nfaTraverse(formalDef,states, symbol) traverses as it would in a nfa
 def nfaTraverse(formalDef,states, symbol):
     states = traverseIndefinitely(formalDef,states,'e')
     states = traverseMultipleStates(formalDef,states,symbol)
     states = traverseIndefinitely(formalDef,states,'e')
     return states
+
 
 #findStateFromStateCombinaton(stateCombinations,combination) is an auxiliar 
 #method to build a state string from a combination of states
@@ -134,6 +142,7 @@ def findStateFromStateCombinaton(stateCombinations,combination):
             break
     return foundCombination
 
+
 #getAlphabet(formalDef) get all the symbols of an automata
 def getAlphabet(formalDef):
     alphabet = set()
@@ -142,6 +151,7 @@ def getAlphabet(formalDef):
             alphabet.add(symbol)
     alphabet.discard('e')
     return alphabet
+
 
 #nfaToDfa(formalDef) build a dfa from a nfa
 def nfaToDfa(formalDef):
@@ -190,6 +200,7 @@ def nfaToDfa(formalDef):
             automataAddTransiton(newFormalDef,newState,symbol,newResultState)    
     return newFormalDef
 
+
 #automataAddTransiton(formalDef,state,symbol,resultState) adds a 
 #transition to an automata even if it doesn't have that key
 def automataAddTransiton(formalDef,state,symbol,resultState):
@@ -200,8 +211,42 @@ def automataAddTransiton(formalDef,state,symbol,resultState):
             formalDef[TRANSITIONS][state][symbol] = resultState    
     except KeyError:
         formalDef[TRANSITIONS][state] = {symbol: [resultState]}
-    
 
+
+# union(formalDefA, formalDefB) constructs an automata recognizing the union 
+# of the languages of two given automatas.
+def union(formalDefA, formalDefB):
+    newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
+    newFormalDef[STATES] = newFormalDef[STATES] + map(lambda oldState: 'A_' + oldState, formalDefA[STATES])
+    newFormalDef[STATES] = newFormalDef[STATES] + map(lambda oldState: 'B_' + oldState, formalDefB[STATES])
+    newFormalDef[ACCEPT] = newFormalDef[ACCEPT] + map(lambda oldState: 'A_' + oldState, formalDefA[ACCEPT])
+    newFormalDef[ACCEPT] = newFormalDef[ACCEPT] + map(lambda oldState: 'B_' + oldState, formalDefB[ACCEPT])
+
+    for state in formalDefA[TRANSITIONS].keys():
+        newFormalDef[TRANSITIONS]['A_' + state] = {
+            '0': map(lambda oldState: 'A_' + oldState, formalDefA[TRANSITIONS][state]['0']),
+            '1': map(lambda oldState: 'A_' + oldState, formalDefA[TRANSITIONS][state]['1'])
+        }
+    for state in formalDefB[TRANSITIONS].keys():
+        newFormalDef[TRANSITIONS]['B_' + state] = {
+            '0': map(lambda oldState: 'B_' + oldState, formalDefB[TRANSITIONS][state]['0']),
+            '1': map(lambda oldState: 'B_' + oldState, formalDefB[TRANSITIONS][state]['1'])
+        }
+
+    newState = 'NEW_STATE'
+    newFormalDef[STATES].append(newState)
+    newFormalDef[INITIAL] = newState
+
+    initialStateA = 'A_' + formalDefA[INITIAL]
+    initialStateB = 'B_' + formalDefB[INITIAL]
+
+    newFormalDef[TRANSITIONS][newState] = {
+        'e': [initialStateA, initialStateB],
+        '0': [],
+        '1': []
+    }
+
+    return newFormalDef
 
 readInputFile()
 print(nfaToDfa(formalDef))
