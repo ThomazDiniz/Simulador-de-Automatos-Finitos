@@ -157,6 +157,11 @@ def getAlphabet(formalDef):
 def nfaToDfa(formalDef):
     newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     
+    for s in formalDef[STATES]:
+        if "_" in s:
+            print("Não foi possível converter o automato para nfa pois o automato utiliza '_' em sua nomenclatura de estados")
+            return formalDef
+
     #CREATE STATE COMBINATIONS (from each state)
     states = formalDef[STATES]
     stateCombinations = []
@@ -192,7 +197,6 @@ def nfaToDfa(formalDef):
     alphabet = getAlphabet(formalDef)
     transitions = formalDef[TRANSITIONS]
     for symbol in alphabet:
-        print(symbol)
         for states in stateCombinations:
             newState = '_'.join(str(state) for state in states)
             newResultStates = nfaTraverse(formalDef,states,symbol)
@@ -291,3 +295,4 @@ intersection(fa,fb)
 readInputFile()
 print(formalDef)
 print(nfaToDfa(formalDef))
+
