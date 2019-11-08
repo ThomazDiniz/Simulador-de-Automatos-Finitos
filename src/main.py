@@ -247,6 +247,47 @@ def union(formalDefA, formalDefB):
     }
 
     return newFormalDef
+    
+def intersection(formalDefA,formalDefB):
+    newFormalDef = newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
+    stateCombinations = list(itertools.product(formalDefA[STATES], formalDefB[STATES]))
+    states = []
+    #States
+    for combinations in stateCombinations:
+        states.append("_".join(str(state) for state in combinations))
+    newFormalDef[STATES] = states
+    #initial
+    newFormalDef[INITIAL] = formalDefA[INITIAL] + "_" +  formalDefB[INITIAL]
+    #ACCEPT:
+    acceptCombination = list(itertools.product(formalDefA[ACCEPT], formalDefB[ACCEPT]))
+    acceptStates = []
+    for combinations in acceptCombination:
+        acceptStates.append("_".join(str(state) for state in combinations))
+    newFormalDef[ACCEPT] = acceptStates
+    #transitions
+    alphabetA = set(getAlphabet(formalDefA))
+    alphabetB = set(getAlphabet(formalDefB))
+    alphabet = alphabetA | alphabetB
+    for symbol in alphabet:
+        for state in newFormalDef[STATES]:
+            stateA,stateB = state.split("_")
+            resultA = nfaTraverse(formalDefA,stateA,symbol)
+            resultB = nfaTraverse(formalDefB,stateB,symbol)
+            for a in resultA:
+                for b in resultB:
+                    myState = stateA + "_" + stateB
+                    resultState = a + "_" + b
+                    automataAddTransiton(newFormalDef,myState,symbol,resultState)
+    
+    return newFormalDef
+
+
+fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A'], '1': ['B']}}}
+fb = {'estados': ['A', 'B', 'C', 'D'], 'inicial': 'A', 'aceita': ['D','A'], 'transicoes': {'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
+
+
+intersection(fa,fb)
 
 readInputFile()
+print(formalDef)
 print(nfaToDfa(formalDef))
