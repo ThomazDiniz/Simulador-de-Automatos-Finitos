@@ -220,38 +220,22 @@ def automataAddTransiton(formalDef,state,symbol,resultState):
 # union(formalDefA, formalDefB) constructs an automata recognizing the union 
 # of the languages of two given automatas.
 def union(formalDefA, formalDefB):
-    newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
-    newFormalDef[STATES] = newFormalDef[STATES] + map(lambda oldState: 'A_' + oldState, formalDefA[STATES])
-    newFormalDef[STATES] = newFormalDef[STATES] + map(lambda oldState: 'B_' + oldState, formalDefB[STATES])
-    newFormalDef[ACCEPT] = newFormalDef[ACCEPT] + map(lambda oldState: 'A_' + oldState, formalDefA[ACCEPT])
-    newFormalDef[ACCEPT] = newFormalDef[ACCEPT] + map(lambda oldState: 'B_' + oldState, formalDefB[ACCEPT])
+    newFormalDef = {
+        STATES: formalDefA[STATES] + formalDefB[STATES],
+        INITIAL: 'NEW_STATE',
+        ACCEPT: formalDefA[ACCEPT] + formalDefB[ACCEPT],
+        TRANSITIONS: formalDefA[TRANSITIONS]
+    }
 
-    for state in formalDefA[TRANSITIONS].keys():
-        newFormalDef[TRANSITIONS]['A_' + state] = {
-            '0': map(lambda oldState: 'A_' + oldState, formalDefA[TRANSITIONS][state]['0']),
-            '1': map(lambda oldState: 'A_' + oldState, formalDefA[TRANSITIONS][state]['1'])
-        }
-    for state in formalDefB[TRANSITIONS].keys():
-        newFormalDef[TRANSITIONS]['B_' + state] = {
-            '0': map(lambda oldState: 'B_' + oldState, formalDefB[TRANSITIONS][state]['0']),
-            '1': map(lambda oldState: 'B_' + oldState, formalDefB[TRANSITIONS][state]['1'])
-        }
+    newFormalDef[STATES].append(newFormalDef[INITIAL])
 
-    newState = 'NEW_STATE'
-    newFormalDef[STATES].append(newState)
-    newFormalDef[INITIAL] = newState
-
-    initialStateA = 'A_' + formalDefA[INITIAL]
-    initialStateB = 'B_' + formalDefB[INITIAL]
-
-    newFormalDef[TRANSITIONS][newState] = {
-        'e': [initialStateA, initialStateB],
-        '0': [],
-        '1': []
+    newFormalDef[TRANSITIONS].update(formalDefB[TRANSITIONS])
+    newFormalDef[TRANSITIONS][newFormalDef[INITIAL]] = {
+        'e': [formalDefA[INITIAL], formalDefB[INITIAL]]
     }
 
     return newFormalDef
-    
+
 def intersection(formalDefA,formalDefB):
     newFormalDef = newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     stateCombinations = list(itertools.product(formalDefA[STATES], formalDefB[STATES]))
@@ -289,10 +273,10 @@ def intersection(formalDefA,formalDefB):
 fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A'], '1': ['B']}}}
 fb = {'estados': ['A', 'B', 'C', 'D'], 'inicial': 'A', 'aceita': ['D','A'], 'transicoes': {'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
+# intersection(fa,fb)
 
-intersection(fa,fb)
+print(union(fa, fb))
 
-readInputFile()
-print(formalDef)
-print(nfaToDfa(formalDef))
-
+# readInputFile()
+# print(formalDef)
+# print(nfaToDfa(formalDef))
