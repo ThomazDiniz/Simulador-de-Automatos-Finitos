@@ -313,6 +313,27 @@ def intersection(formalDefA,formalDefB):
     
     return newFormalDef
 
+def starOperation(formalDef):
+    newFormalDef = formalDef
+
+    # A new state is added
+    newFormalDef[STATES].append('NEW_STATE')
+
+    oldInitial = newFormalDef[INITIAL]
+    oldAccepts = newFormalDef[ACCEPT]
+    
+    # New state is setted to initial and accept states
+    newFormalDef[INITIAL] = 'NEW_STATE'
+    newFormalDef[ACCEPT].append('NEW_STATE')
+    
+    # Empty transiton from new initial to old initial
+    newFormalDef[TRANSITIONS]['NEW_STATE'] = { 'e' : [oldInitial] } 
+
+    # Empty transitions created from old accept states to old initial state
+    for oldAccept in oldAccepts:
+        newFormalDef[TRANSITIONS][oldAccept]['e'] = [oldInitial]
+
+    return newFormalDef
 
 
 
@@ -320,8 +341,6 @@ fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A'
 fb = {'estados': ['A', 'B', 'C', 'D'], 'inicial': 'A', 'aceita': ['D','A'], 'transicoes': {'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
 # intersection(fa,fb)
-
-#print(union(fa, fb))
 
 readInputFile()
 # print(formalDef)
