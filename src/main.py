@@ -1,5 +1,4 @@
-import sys
-import itertools
+import sys, itertools, os
 from collections import deque
 
 ACCEPT      = 'aceita'
@@ -7,13 +6,57 @@ STATES      = 'estados'
 INITIAL     = 'inicial'
 TRANSITIONS = 'transicoes'
 
+
+
+operations = ['-u','-i','-d','-s','-c','-m']
+OP_UNION = operations[0]
+OP_INTERSECTION = operations[1]
+OP_DFACONVERSION = operations[2]
+OP_STAR = operations[3]
+OP_COMPLEMENT = operations[4]
+OP_MINIMIZATION = operations[5]
+
+
 formalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
+automatas = [] 
+
+def readInputFile():
+    directories = [d for d in sys.argv[1:] if d not in operations and os.path.isfile(d)]
+    operation = next((op for op in sys.argv[1:] if op in operations),'')
+    word = next((w for w in sys.argv[1:] if w not in directories and w not in operations))
+    automatas = [readAutomataFile(d) for d in directories]
+
+    result = ''
+    if operation == OP_UNION:
+        print('Operação de União:')
+        result = union(automatas[0],automatas[1])
+    elif operation == OP_INTERSECTION:
+        print('Operação de Intersecção:')
+        result = intersection(automatas[0],automatas[1])
+    elif operation == OP_DFACONVERSION:
+        print('Operação conversão NFA para DFA:')
+        result = nfaToDfa(automatas[0])
+    elif operation == OP_STAR:
+        print('Operação Estrela:')
+        print("Not implemented yet")
+    elif operation == OP_COMPLEMENT:
+        print('Operação Complemento:')
+        generateComplement(automatas[0])
+    elif operation == OP_MINIMIZATION:
+        print('Operação Minimização:')
+        print("Not implemented YET")
+    else:
+        print('Operação de Simulação:')
+        simulate(automatas[0])
+    print(result)
+
 
 # readInputFile() reads a file.txt in the specified format 
 # and inserts the data into `formalDef` object.
 # required filename passed by argument.
-def readInputFile():
-    inputFile = open(sys.argv[1], 'r')
+def readAutomataFile(directory):
+    inputFile = open(directory, 'r')
+    formalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     while True:
         line = inputFile.readline()
         if not line: break
@@ -31,12 +74,13 @@ def readInputFile():
             else:
                 formalDef[TRANSITIONS][currentState] = {symbol: [nextState]}
     formalDef[INITIAL] = formalDef[INITIAL][0]
-
-
+    inputFile.close()
+    return formalDef
+    
 # simulate() simulate the automaton specified in the formatDef object
 # when it reads the word given in the sys argument and returns a list
 # with the states where the automaton stops at the end of the word.
-def simulate():
+def simulate(formalDef):
     word = sys.argv[2]
     toProcess = deque([])
     toProcess.append(formalDef[INITIAL])
@@ -270,13 +314,15 @@ def intersection(formalDefA,formalDefB):
     return newFormalDef
 
 
+
+
 fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A'], '1': ['B']}}}
 fb = {'estados': ['A', 'B', 'C', 'D'], 'inicial': 'A', 'aceita': ['D','A'], 'transicoes': {'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
 # intersection(fa,fb)
 
-print(union(fa, fb))
+#print(union(fa, fb))
 
-# readInputFile()
+readInputFile()
 # print(formalDef)
 # print(nfaToDfa(formalDef))
