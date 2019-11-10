@@ -21,7 +21,7 @@ As operações possíveis são:
 
 `'-u','-i','-d','-s','-c','-m'`
 
-###Exemplos de execução
+### Exemplos de execução
 #### Simulação 
 `py main.py path_to_automata word`
 #### Conversão NFA para DFA (-d)
