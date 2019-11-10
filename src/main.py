@@ -6,8 +6,6 @@ STATES      = 'estados'
 INITIAL     = 'inicial'
 TRANSITIONS = 'transicoes'
 
-
-
 operations = ['-u','-i','-d','-s','-c','-m']
 OP_UNION = operations[0]
 OP_INTERSECTION = operations[1]
@@ -23,7 +21,7 @@ automatas = []
 def readInputFile():
     directories = [d for d in sys.argv[1:] if d not in operations and os.path.isfile(d)]
     operation = next((op for op in sys.argv[1:] if op in operations),'')
-    word = next((w for w in sys.argv[1:] if w not in directories and w not in operations))
+    word = next((w for w in sys.argv[1:] if w not in directories and w not in operations),'')
     automatas = [readAutomataFile(d) for d in directories]
 
     result = ''
@@ -38,7 +36,7 @@ def readInputFile():
         result = nfaToDfa(automatas[0])
     elif operation == OP_STAR:
         print('Operação Estrela:')
-        print("Not implemented yet")
+        result = starOperation(automatas[0])
     elif operation == OP_COMPLEMENT:
         print('Operação Complemento:')
         generateComplement(automatas[0])
@@ -48,7 +46,9 @@ def readInputFile():
     else:
         print('Operação de Simulação:')
         simulate(automatas[0])
-    print(result)
+        
+    if operation != '':
+        writeOutputFile(result)
 
 
 # readInputFile() reads a file.txt in the specified format 
