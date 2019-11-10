@@ -27,12 +27,12 @@ As operações possíveis são:
 #### Conversão NFA para DFA (-d)
 `py main.py path_to_automata -d`
 #### Operação Estrela (-s)
-`py main.py path_to_automata -s``
+`py main.py path_to_automata -s`
 #### Operação Complemento (-c)
-`py main.py path_to_automata -s``
+`py main.py path_to_automata -s`
 #### Operação Minimização (-m)
 `py main.py path_to_automata -m`
 #### União (-u)
-`py main.py path_to_automata1 path_to_automata2 -u
+`py main.py path_to_automata1 path_to_automata2 -u`
 #### Intersecção (-i)
 `py main.py path_to_automata1 path_to_automata2 -i`
