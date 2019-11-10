@@ -217,6 +217,8 @@ def nfaToDfa(formalDef):
 
     for states in stateCombinations:
         newStates.append("_".join(str(state) for state in states))
+
+    newStates.append("_")
     newFormalDef[STATES] = newStates
 
     #SET ACCEPTING STATES (for every state accept the ones that has at least one accepting state)
