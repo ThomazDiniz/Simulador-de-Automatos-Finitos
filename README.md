@@ -10,10 +10,16 @@
 - Intersecção
 
 ### Como rodar
-Vá até o diretório do src do projeto e execute com python 3 utilizando os parâmetros
+Vá até o diretório do src do projeto e execute com python 3 utilizando os parâmetros:
+
+
 `cd "path_to_src"`
+
 `py main.py "path_to_automata1" "path_to_automata2" "operation"`
-As operações possíveis são: `'-u','-i','-d','-s','-c','-m'`
+
+As operações possíveis são: 
+
+`'-u','-i','-d','-s','-c','-m'`
 
 ###Exemplos de execução
 #### Simulação 
