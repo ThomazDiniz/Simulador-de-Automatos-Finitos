@@ -1,7 +1,10 @@
 # Simulador de Automatos Finitos
 
-### Operações 
-- Simulação
+Simulador de autômatos finitos com interface de linha de comando desenvolvido em Python 3.
+
+### Operações
+As seguintes operações são suportadas:
+
 - Conversão de NFA para DFA
 - Complemento
 - Estrela
