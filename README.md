@@ -56,7 +56,7 @@ Operação na qual se inverte as condições de aceitação e não aceitação d
 
 Exemplo de execução:
 
-`py main.py path_to_automata -s`
+`py main.py path_to_automata -c`
 
 #### Operação Minimização (-m)
 Um AFD é mínimo para a linguagem se nenhum AFD para essa linguagem contém menor número de estados. Para isso, elimina-se os estados não alcançáveis a partir do estado inicial. Por fim, substitui-se cada grupo de estados equivalentes por um único estado.
@@ -66,7 +66,9 @@ Exemplo de execução:
 `py main.py path_to_automata -m`
 
 #### União (-u)
-Operação realizada através do produto de dois autômatos, que nada mais é do que a execução de dois autômatos em paralelo. É criado um novo estado inicial com transições que aceitam a cadeia vazia para a junção dos dois autômatos. Após isso é calculado o produto.
+Operação realizada através da execução de dois autômatos em paralelo. É criado um novo estado inicial com transições que aceitam a cadeia vazia para a junção dos dois autômatos.
+
+> Para melhor entendimento do resultado, sugerimos atribuir nomes diferentes aos estados dos dois autômatos.
 
 `py main.py path_to_automata1 path_to_automata2 -u`
 
