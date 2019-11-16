@@ -176,6 +176,7 @@ def nfaTraverse(formalDef,states, symbol):
     return states
 
 
+
 #findStateFromStateCombinaton(stateCombinations,combination) is an auxiliar 
 #method to build a state string from a combination of states
 def findStateFromStateCombinaton(stateCombinations,combination):
@@ -337,13 +338,38 @@ def starOperation(formalDef):
 
     return newFormalDef
 
+def minimize(formalDef):  
+    #remove all unreachable states
+    reachableStates = findReachableStates(formalDef)
+    formalDef[STATES] = [s for s in formalDef[STATES] if s in reachableStates]
+    formalDef[ACCEPT] = [s for s in formalDef[ACCEPT] if s in reachableStates]
+    
+    return formalDef
+ 
+#transform to dfa   
+#dfa = nfaToDfa(formalDef)
+
+
+def findReachableStates(formalDef):
+    alphabet = getAlphabet(formalDef)
+    initial = formalDef[INITIAL]
+    reachableStates = [initial]
+    previousReachableStates = []
+    while True:
+        for symbol in alphabet:
+            reachableStates = set(reachableStates).union(set(traverseMultipleStates(formalDef,reachableStates,symbol)))
+        if reachableStates == previousReachableStates:
+            break
+        previousReachableStates = reachableStates
+    return reachableStates
 
 
 fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A'], '1': ['B']}}}
-fb = {'estados': ['A', 'B', 'C', 'D'], 'inicial': 'A', 'aceita': ['D','A'], 'transicoes': {'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
+fb = {'estados': ['A', 'B', 'C', 'D', 'Z'], 'inicial': 'A', 'aceita': ['D','A','Z'], 'transicoes': {'Z':{'0':['Z','A']},'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
 # intersection(fa,fb)
-
-readInputFile()
+print(fb)
+print(minimize(fb))
+#readInputFile()
 # print(formalDef)
 # print(nfaToDfa(formalDef))
