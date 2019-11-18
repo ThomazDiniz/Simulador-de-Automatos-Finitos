@@ -258,6 +258,8 @@ def nfaToDfa(formalDef):
             newState = '_'.join(str(state) for state in states)
             newResultStates = nfaTraverse(formalDef,states,symbol)
             newResultState = findStateFromStateCombinaton(stateCombinations,newResultStates)
+            if newResultState == '':
+                newResultState = '_'
             automataAddTransiton(newFormalDef,newState,symbol,newResultState)    
     return newFormalDef
 
@@ -270,7 +272,7 @@ def automataAddTransiton(formalDef,state,symbol,resultState):
         if symbol in formalDef[TRANSITIONS][state]:
             formalDef[TRANSITIONS][state][symbol].append(resultState)
         else:
-            formalDef[TRANSITIONS][state][symbol] = resultState    
+            formalDef[TRANSITIONS][state][symbol] = [resultState]    
     except KeyError:
         formalDef[TRANSITIONS][state] = {symbol: [resultState]}
 
@@ -355,15 +357,25 @@ def starOperation(formalDef):
 
 def minimize(formalDef):  
     #remove all unreachable states
-    reachableStates = findReachableStates(formalDef)
-    formalDef[STATES] = [s for s in formalDef[STATES] if s in reachableStates]
-    formalDef[ACCEPT] = [s for s in formalDef[ACCEPT] if s in reachableStates]
+    formalDef = removeUnreachableStates(formalDef)
+    #nfaTransform
+    formalDef = nfaToDfa(formalDef)
+    #remove all unreachable states once again
+    formalDef = removeUnreachableStates(formalDef)
     
     return formalDef
  
 #transform to dfa   
 #dfa = nfaToDfa(formalDef)
 
+def removeUnreachableStates(formalDef):
+    reachableStates = findReachableStates(formalDef)
+    unreachableStates = set([s for s in formalDef[STATES] if s not in reachableStates])
+    formalDef[STATES] = [s for s in formalDef[STATES] if s in reachableStates]
+    formalDef[ACCEPT] = [s for s in formalDef[ACCEPT] if s in reachableStates]
+    for s in unreachableStates:
+        formalDef[TRANSITIONS].pop(s, None)
+    return formalDef
 
 def findReachableStates(formalDef):
     alphabet = getAlphabet(formalDef)
@@ -378,14 +390,14 @@ def findReachableStates(formalDef):
         previousReachableStates = reachableStates
     return reachableStates
 
-fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A'], '1': ['B']}}}
+fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A']}}}
 fb = {'estados': ['A', 'B', 'C', 'D', 'Z'], 'inicial': 'A', 'aceita': ['D','A','Z'], 'transicoes': {'Z':{'0':['Z','A']},'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
 # intersection(fa,fb)
-print(fb)
-print(minimize(fb))
+print(fa)
+print(nfaToDfa(fa))
 #readInputFile()
 # print(formalDef)
 # print(nfaToDfa(formalDef))
 
-handleInput()
+#handleInput()
