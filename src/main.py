@@ -18,16 +18,16 @@ OP_MINIMIZATION = operations[5]
 formalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
 automatas = [] 
 
-def readInputFile():
+# handleInput read input commands and redirect to responsible function
+def handleInput():
     directories = [d for d in sys.argv[1:] if d not in operations and os.path.isfile(d)]
     operation = next((op for op in sys.argv[1:] if op in operations),'')
-    word = next((w for w in sys.argv[1:] if w not in directories and w not in operations),'')
     automatas = [readAutomataFile(d) for d in directories]
 
     result = ''
     if operation == OP_UNION:
         print('Operação de União:')
-        result = union(automatas[0],automatas[1])
+        result = union(automatas[0], automatas[1])
     elif operation == OP_INTERSECTION:
         print('Operação de Intersecção:')
         result = intersection(automatas[0],automatas[1])
@@ -39,10 +39,11 @@ def readInputFile():
         result = starOperation(automatas[0])
     elif operation == OP_COMPLEMENT:
         print('Operação Complemento:')
-        generateComplement(automatas[0])
+        result = generateComplement(automatas[0])
     elif operation == OP_MINIMIZATION:
         print('Operação Minimização:')
         print("Not implemented YET")
+        result = ''
     else:
         print('Operação de Simulação:')
         simulate(automatas[0])
@@ -51,11 +52,10 @@ def readInputFile():
         writeOutputFile(result)
 
 
-# readInputFile() reads a file.txt in the specified format 
-# and inserts the data into `formalDef` object.
-# required filename passed by argument.
-def readAutomataFile(directory):
-    inputFile = open(directory, 'r')
+# readAutomataFile reads a text file and specifies the automaton,
+# requires the path to file
+def readAutomataFile(filePath):
+    inputFile = open(filePath, 'r')
     formalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     while True:
         line = inputFile.readline()
@@ -77,9 +77,10 @@ def readAutomataFile(directory):
     inputFile.close()
     return formalDef
     
-# simulate() simulate the automaton specified in the formatDef object
-# when it reads the word given in the sys argument and returns a list
-# with the states where the automaton stops at the end of the word.
+# simulate process the automaton specified,
+# when it reads the word given it returns a list
+# with the states where the automaton stops at the end of the word
+# requires the formal definition of the automaton
 def simulate(formalDef):
     word = sys.argv[2]
     toProcess = deque([])
@@ -95,22 +96,24 @@ def simulate(formalDef):
             for nextState in formalDef[TRANSITIONS][currentState][symbol]:
                 toProcess.append(nextState)
                 print(nextState, '\t', word if len(word) > 0 else 'e')
-    showVeredict(toProcess)
+    showVeredict(formalDef, toProcess)
 
 
-# showVeredict() receives a list with the states the automaton stops
+# showVeredict receives a list with the states the automaton stops
 # at the end of a word and verifies if one of them is an accept state
 # and shows a message according to it.
-def showVeredict(states):
+# requires the formal definition of the automaton and list of states
+def showVeredict(formalDef, states):
     accept = False
     for state in states:
         if (state in formalDef[ACCEPT]): accept = True
     print('\nA palavra %sfoi aceita' % ('nao ' if not accept else ''))
 
 
-# generateComplement(formalDef) generate the complement automaton for the
-# automaton received in the param. It returns a formal definition for the
-# complement automaton.
+# generateComplement generate the complement automaton for the
+# automaton received in the param.
+# it returns a formal definition for the complement automaton.
+# requires the formal definition of the automaton
 def generateComplement(formalDef):
     complementDef = {}
     complementDef[INITIAL] = formalDef[INITIAL]
@@ -120,7 +123,8 @@ def generateComplement(formalDef):
     return complementDef
 
 
-# writeOutputFile(formalDef) writes an automaton to the default output
+# writeOutputFile writes an automaton to the default output
+# requires the formal definition of the automaton 
 def writeOutputFile(formalDef):
     automataAsStr = STATES   +  ' '  + ', '.join(str(state) for state in formalDef[STATES]) + '\n'
     automataAsStr += INITIAL +  ' '  + formalDef[INITIAL] + '\n'
@@ -134,19 +138,21 @@ def writeOutputFile(formalDef):
     print(automataAsStr)
 
 
-#traverse(formalDef,state,symbol) traverses through the automata 
-#and returns all the states it should be after the input is set
-def traverse(formalDef,state,symbol):
+# traverse traverses through the automaton 
+# and returns all the states it should be after the input is set
+# requires the formal definition of the automaton, state and symbol
+def traverse(formalDef, state, symbol):
     if state in formalDef[TRANSITIONS]:
         if symbol in formalDef[TRANSITIONS][state]:
             return formalDef[TRANSITIONS][state][symbol]
     return []
 
 
-#traverse(formalDef,state,symbol) traverses through the automata 
-#and returns all the states it should be after all the inputs are set
-#the difference from this to traverse is that it receives multiple states
-def traverseMultipleStates(formalDef,states,symbol):
+# traverse traverses through the automaton 
+# and returns all the states it should be after all the inputs are set
+# the difference from this to traverse is that it receives multiple states
+# requires the formal definition of the automaton, state and symbol
+def traverseMultipleStates(formalDef, states, symbol):
     finalStates = []
     for state in states:
         if state in formalDef[TRANSITIONS]:
@@ -155,10 +161,10 @@ def traverseMultipleStates(formalDef,states,symbol):
     return finalStates
 
 
-#traverseIndefinitely(formalDef,state,symbol) traverse indefinitely 
-#using a symbol. It only stops when the set of states
-#doesn't change after a traverse
-def traverseIndefinitely(formalDef,states, symbol):
+# traverseIndefinitely traverse indefinitely using a symbol,
+# it only stops when the set of states doesn't change after a traverse.
+# requires the formal definition of the automaton, state and symbol
+def traverseIndefinitely(formalDef, states, symbol):
     previousStates = []
     while True:
         states = set(states).union(set(traverseMultipleStates(formalDef,states,symbol)))
@@ -168,16 +174,18 @@ def traverseIndefinitely(formalDef,states, symbol):
     return states
 
 
-#nfaTraverse(formalDef,states, symbol) traverses as it would in a nfa
-def nfaTraverse(formalDef,states, symbol):
+# nfaTraverse traverses as it would in a nfa
+# requires the formal definition of the automaton, state and symbol
+def nfaTraverse(formalDef, states, symbol):
     states = traverseIndefinitely(formalDef,states,'e')
     states = traverseMultipleStates(formalDef,states,symbol)
     states = traverseIndefinitely(formalDef,states,'e')
     return states
 
 
-#findStateFromStateCombinaton(stateCombinations,combination) is an auxiliar 
-#method to build a state string from a combination of states
+# findStateFromStateCombinaton is an auxiliar 
+# method to build a state string from a combination of states
+# requires a list of state combinations and the combination
 def findStateFromStateCombinaton(stateCombinations,combination):
     foundCombination = ""
     for comb in stateCombinations:
@@ -187,7 +195,8 @@ def findStateFromStateCombinaton(stateCombinations,combination):
     return foundCombination
 
 
-#getAlphabet(formalDef) get all the symbols of an automata
+# getAlphabet(formalDef) get all the symbols of an automaton
+# requires the formal definition of the automaton
 def getAlphabet(formalDef):
     alphabet = set()
     for state in formalDef[TRANSITIONS]:
@@ -197,7 +206,8 @@ def getAlphabet(formalDef):
     return alphabet
 
 
-#nfaToDfa(formalDef) build a dfa from a nfa
+# nfaToDfa build a dfa from a nfa
+# requires the formal definition of the automaton
 def nfaToDfa(formalDef):
     newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     
@@ -206,7 +216,7 @@ def nfaToDfa(formalDef):
             print("Não foi possível converter o automato para nfa pois o automato utiliza '_' em sua nomenclatura de estados")
             return formalDef
 
-    #CREATE STATE COMBINATIONS (from each state)
+    # CREATE STATE COMBINATIONS (from each state)
     states = formalDef[STATES]
     stateCombinations = []
     newStates = []
@@ -221,7 +231,7 @@ def nfaToDfa(formalDef):
     newStates.append("_")
     newFormalDef[STATES] = newStates
 
-    #SET ACCEPTING STATES (for every state accept the ones that has at least one accepting state)
+    # SET ACCEPTING STATES (for every state accept the ones that has at least one accepting state)
     accepting_states = formalDef[ACCEPT]
     newAccepting_states = []
 
@@ -233,13 +243,14 @@ def nfaToDfa(formalDef):
     newAccepting_states = set(newAccepting_states)
     newFormalDef[ACCEPT] = newAccepting_states
 
-    #SET INITIAL STATE (from the initial state traverse all 'e' symbols until you can't you get the most states. The initial state is a combination of every single starting state)
+    # SET INITIAL STATE (from the initial state traverse all 'e' symbols until you can't you 
+    # get the most states. The initial state is a combination of every single starting state)
     initial = formalDef[INITIAL]
     newInitial = traverseIndefinitely(formalDef,initial,'e')
     newFormalDef[INITIAL] = findStateFromStateCombinaton(stateCombinations,newInitial)
     
     
-    #SET TRANSITIONS
+    # SET TRANSITIONS
     alphabet = getAlphabet(formalDef)
     transitions = formalDef[TRANSITIONS]
     for symbol in alphabet:
@@ -247,24 +258,27 @@ def nfaToDfa(formalDef):
             newState = '_'.join(str(state) for state in states)
             newResultStates = nfaTraverse(formalDef,states,symbol)
             newResultState = findStateFromStateCombinaton(stateCombinations,newResultStates)
+            if newResultState == '':
+                newResultState = '_'
             automataAddTransiton(newFormalDef,newState,symbol,newResultState)    
     return newFormalDef
 
 
-#automataAddTransiton(formalDef,state,symbol,resultState) adds a 
-#transition to an automata even if it doesn't have that key
+# automataAddTransiton(formalDef,state,symbol,resultState) adds a 
+# transition to an automata even if it doesn't have that key
+# requires the formal definition of the automaton, the state, symbol and the result state
 def automataAddTransiton(formalDef,state,symbol,resultState):
     try:
         if symbol in formalDef[TRANSITIONS][state]:
             formalDef[TRANSITIONS][state][symbol].append(resultState)
         else:
-            formalDef[TRANSITIONS][state][symbol] = resultState    
+            formalDef[TRANSITIONS][state][symbol] = [resultState]    
     except KeyError:
         formalDef[TRANSITIONS][state] = {symbol: [resultState]}
 
 
-# union(formalDefA, formalDefB) constructs an automata recognizing the union 
-# of the languages of two given automatas.
+# union constructs an automata recognizing the union of the languages of two given automata.
+# requires two formal definitions of automata
 def union(formalDefA, formalDefB):
     newFormalDef = {
         STATES: ['NEW_STATE'],
@@ -299,23 +313,25 @@ def union(formalDefA, formalDefB):
 
     return newFormalDef
 
-def intersection(formalDefA,formalDefB):
+# intersection constructs an automata recognizing the intersection of the languages of two given automata.
+# requires two formal definitions of automata
+def intersection(formalDefA, formalDefB):
     newFormalDef = newFormalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
     stateCombinations = list(itertools.product(formalDefA[STATES], formalDefB[STATES]))
     states = []
-    #States
+    # states
     for combinations in stateCombinations:
         states.append("_".join(str(state) for state in combinations))
     newFormalDef[STATES] = states
-    #initial
+    # initial
     newFormalDef[INITIAL] = formalDefA[INITIAL] + "_" +  formalDefB[INITIAL]
-    #ACCEPT:
+    # accept
     acceptCombination = list(itertools.product(formalDefA[ACCEPT], formalDefB[ACCEPT]))
     acceptStates = []
     for combinations in acceptCombination:
         acceptStates.append("_".join(str(state) for state in combinations))
     newFormalDef[ACCEPT] = acceptStates
-    #transitions
+    # transitions
     alphabetA = set(getAlphabet(formalDefA))
     alphabetB = set(getAlphabet(formalDefB))
     alphabet = alphabetA | alphabetB
@@ -332,6 +348,8 @@ def intersection(formalDefA,formalDefB):
     
     return newFormalDef
 
+# starOperation builds the star operation for the given automaton
+# requires the formal definition of automaton
 def starOperation(formalDef):
     newFormalDef = formalDef
 
@@ -354,13 +372,49 @@ def starOperation(formalDef):
 
     return newFormalDef
 
+def minimize(formalDef):  
+    #remove all unreachable states
+    formalDef = removeUnreachableStates(formalDef)
+    #nfaTransform
+    formalDef = nfaToDfa(formalDef)
+    #remove all unreachable states once again
+    formalDef = removeUnreachableStates(formalDef)
+    
+    return formalDef
+ 
+#transform to dfa   
+#dfa = nfaToDfa(formalDef)
 
+def removeUnreachableStates(formalDef):
+    reachableStates = findReachableStates(formalDef)
+    unreachableStates = set([s for s in formalDef[STATES] if s not in reachableStates])
+    formalDef[STATES] = [s for s in formalDef[STATES] if s in reachableStates]
+    formalDef[ACCEPT] = [s for s in formalDef[ACCEPT] if s in reachableStates]
+    for s in unreachableStates:
+        formalDef[TRANSITIONS].pop(s, None)
+    return formalDef
 
-fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A'], '1': ['B']}}}
-fb = {'estados': ['A', 'B', 'C', 'D'], 'inicial': 'A', 'aceita': ['D','A'], 'transicoes': {'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
+def findReachableStates(formalDef):
+    alphabet = getAlphabet(formalDef)
+    initial = formalDef[INITIAL]
+    reachableStates = [initial]
+    previousReachableStates = []
+    while True:
+        for symbol in alphabet:
+            reachableStates = set(reachableStates).union(set(traverseMultipleStates(formalDef,reachableStates,symbol)))
+        if reachableStates == previousReachableStates:
+            break
+        previousReachableStates = reachableStates
+    return reachableStates
+
+fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A']}}}
+fb = {'estados': ['A', 'B', 'C', 'D', 'Z'], 'inicial': 'A', 'aceita': ['D','A','Z'], 'transicoes': {'Z':{'0':['Z','A']},'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
 # intersection(fa,fb)
-
-readInputFile()
+print(fa)
+print(nfaToDfa(fa))
+#readInputFile()
 # print(formalDef)
 # print(nfaToDfa(formalDef))
+
+#handleInput()
