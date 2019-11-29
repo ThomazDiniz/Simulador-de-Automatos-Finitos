@@ -5,7 +5,6 @@ ACCEPT      = 'aceita'
 STATES      = 'estados'
 INITIAL     = 'inicial'
 TRANSITIONS = 'transicoes'
-ALPHABET    = ['0', '1'] 
 
 operations = ['-u','-i','-d','-s','-c','-m']
 OP_UNION = operations[0]
@@ -27,6 +26,7 @@ def _getNotFinalStates(formalDef):
             notFinalStates.append(state)
     return notFinalStates
 
+
 # _minimalStates calculates the minimal states for the automaton given
 def _minimalStates(formalDef):
     formalDef = removeUnreachableStates(formalDef)
@@ -35,13 +35,13 @@ def _minimalStates(formalDef):
     sets = [notFinalStates, finalStates]
     currentSets = []
     transitios = formalDef[TRANSITIONS]
-    
+    alphabet = getAlphabet(formalDef)
     while currentSets == []:
         currentSets = sets
         sets = []
         for subSet in currentSets:
             isDivided = False
-            for symbol in ALPHABET:
+            for symbol in alphabet:
                 into = []
                 outo = []
                 for state in subSet:
@@ -80,10 +80,11 @@ def _getAcceptStates(formalDef, minimalStates):
 def _getTransitions(formalDef, minimalStates):
     accept = formalDef[ACCEPT]
     transitions = {}
+    alphabet = getAlphabet(formalDef)
     for state in minimalStates:
         transitions[state] = {}
-        for symbol in ALPHABET: transitions[symbol] = []
-        for symbol in ALPHABET:
+        for symbol in alphabet: transitions[symbol] = []
+        for symbol in alphabet:
             nextStates = []
             for s in list(state):
                 for b in formalDef[TRANSITIONS][s][symbol]:
