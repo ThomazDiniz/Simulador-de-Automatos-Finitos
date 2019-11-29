@@ -5,6 +5,7 @@ ACCEPT      = 'aceita'
 STATES      = 'estados'
 INITIAL     = 'inicial'
 TRANSITIONS = 'transicoes'
+ALPHBAET    = ['0', '1'] 
 
 operations = ['-u','-i','-d','-s','-c','-m']
 OP_UNION = operations[0]
@@ -17,6 +18,96 @@ OP_MINIMIZATION = operations[5]
 
 formalDef = {STATES: [], INITIAL: '', ACCEPT: [], TRANSITIONS: {}}
 automatas = [] 
+
+# _getNotFinalStates get state that are not final states
+def _getNotFinalStates(formalDef):
+    notFinalStates = []
+    for state in formalDef[STATES]:
+        if not state in formalDef[ACCEPT]:
+            notFinalStates.append(state)
+    return notFinalStates
+
+# _minimalStates calculates the minimal states for the automaton given
+def _minimalStates(formalDef):
+    formalDef = removeUnreachableStates(formalDef)
+    notFinalStates = _getNotFinalStates(formalDef)
+    finalStates = formalDef[ACCEPT]
+    sets = [notFinalStates, finalStates]
+    currentSets = []
+    transitios = formalDef[TRANSITIONS]
+    
+    while currentSets == []:
+        currentSets = sets
+        sets = []
+        for subSet in currentSets:
+            isDivided = False
+            for symbol in ALPHBAET:
+                into = []
+                outo = []
+                for state in subSet:
+                    try:
+                        if transitios[state][symbol][0] in finalStates: into.append(state)
+                        else: outo.append(state)
+                    except KeyError:
+                        outo.append(state)
+                if into != [] and outo != []:
+                    sets.append(into)
+                    sets.append(outo)
+                    isDivided = True
+                    break
+            if not isDivided:
+                sets.append(subSet)
+    return list(map(lambda x: ''.join(x), sets))
+
+# _getInitialState calculates the new initial state for the minimal automaton
+def _getInitialState(formalDef, minimalStates):
+    for state in minimalStates:
+        if formalDef[INITIAL] in state:
+            return state
+    return ''
+
+# _getAcceptStates calculates the new accept state for the minimal automaton
+def _getAcceptStates(formalDef, minimalStates):
+    accept = []
+    for state in minimalStates:
+        for finalState in formalDef[ACCEPT]:
+            if finalState in state:
+                accept.append(state)
+    return list(set(accept))
+
+# _getTransitions calculates the transitions for the new automaton
+# with its states changes to be the minimal one.
+def _getTransitions(formalDef, minimalStates):
+    accept = formalDef[ACCEPT]
+    transitions = {}
+    for state in minimalStates:
+        transitions[state] = {}
+        for symbol in ALPHBAET: transitions[symbol] = []
+        for symbol in ALPHBAET:
+            nextStates = []
+            for s in list(state):
+                for b in formalDef[TRANSITIONS][s][symbol]:
+                    for nextState in minimalStates:
+                        if b in nextState: 
+                            nextStates.append(nextState)
+            transitions[state][symbol] = list(set(nextStates))
+    return transitions
+
+# minimization generates a new automaton with the minimal states and transitions
+# necessaries to do the same computation as the larger received does
+def minimization(formalDef):
+    minimal_states = _minimalStates(formalDef)
+    initial = _getInitialState(formalDef, minimal_states)
+    accept = _getAcceptStates(formalDef, minimal_states)
+    transitions = _getTransitions(formalDef, minimal_states)
+
+    minimal_formalDef = {
+        STATES: minimal_states,
+        INITIAL: initial,
+        ACCEPT: accept,
+        TRANSITIONS: transitions
+    }
+    return minimal_formalDef
 
 # handleInput read input commands and redirect to responsible function
 def handleInput():
@@ -393,11 +484,45 @@ def findReachableStates(formalDef):
 fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A']}}}
 fb = {'estados': ['A', 'B', 'C', 'D', 'Z'], 'inicial': 'A', 'aceita': ['D','A','Z'], 'transicoes': {'Z':{'0':['Z','A']},'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
 
+mine = {
+    STATES: ['a', 'b', 'c', 'd', 'e', 'f'],
+    INITIAL: 'a',
+    ACCEPT: ['c', 'd', 'e'],
+    TRANSITIONS: {
+        'a': {
+            '0': ['b'],
+            '1': ['d']
+        },
+        'b': {
+            '0': ['a'],
+            '1': ['c']
+        },
+        'c': {
+            '0': ['e'],
+            '1': ['f']
+        },
+        'd': {
+            '0': ['e'],
+            '1': ['f']
+        },
+        'e': {
+            '0': ['e'],
+            '1': ['f']
+        },
+        'f': {
+            '0': ['f'],
+            '1': ['f']
+        }
+    }
+}
+
 # intersection(fa,fb)
-print(fa)
-print(nfaToDfa(fa))
+# print(fa)
+# print(nfaToDfa(fa))
 #readInputFile()
 # print(formalDef)
 # print(nfaToDfa(formalDef))
+
+# print(minimization(mine))
 
 #handleInput()
