@@ -5,7 +5,7 @@ ACCEPT      = 'aceita'
 STATES      = 'estados'
 INITIAL     = 'inicial'
 TRANSITIONS = 'transicoes'
-ALPHBAET    = ['0', '1'] 
+ALPHABET    = ['0', '1'] 
 
 operations = ['-u','-i','-d','-s','-c','-m']
 OP_UNION = operations[0]
@@ -41,7 +41,7 @@ def _minimalStates(formalDef):
         sets = []
         for subSet in currentSets:
             isDivided = False
-            for symbol in ALPHBAET:
+            for symbol in ALPHABET:
                 into = []
                 outo = []
                 for state in subSet:
@@ -82,8 +82,8 @@ def _getTransitions(formalDef, minimalStates):
     transitions = {}
     for state in minimalStates:
         transitions[state] = {}
-        for symbol in ALPHBAET: transitions[symbol] = []
-        for symbol in ALPHBAET:
+        for symbol in ALPHABET: transitions[symbol] = []
+        for symbol in ALPHABET:
             nextStates = []
             for s in list(state):
                 for b in formalDef[TRANSITIONS][s][symbol]:
