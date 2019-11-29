@@ -133,8 +133,7 @@ def handleInput():
         result = generateComplement(automatas[0])
     elif operation == OP_MINIMIZATION:
         print('Operação Minimização:')
-        print("Not implemented YET")
-        result = ''
+        result = minimization(automatas[0])
     else:
         print('Operação de Simulação:')
         simulate(automatas[0])
@@ -463,15 +462,6 @@ def starOperation(formalDef):
 
     return newFormalDef
 
-def minimize(formalDef):  
-    #remove all unreachable states
-    formalDef = removeUnreachableStates(formalDef)
-    #nfaTransform
-    formalDef = nfaToDfa(formalDef)
-    #remove all unreachable states once again
-    formalDef = removeUnreachableStates(formalDef)
-    
-    return formalDef
  
 #transform to dfa   
 #dfa = nfaToDfa(formalDef)
@@ -498,48 +488,4 @@ def findReachableStates(formalDef):
         previousReachableStates = reachableStates
     return reachableStates
 
-fa = {'estados': ['A', 'B'], 'inicial': 'A', 'aceita': ['B'], 'transicoes': {'A': {'0': ['B'], '1': ['A']}, 'B': {'0': ['A']}}}
-fb = {'estados': ['A', 'B', 'C', 'D', 'Z'], 'inicial': 'A', 'aceita': ['D','A','Z'], 'transicoes': {'Z':{'0':['Z','A']},'A': {'0': ['B'], '1': ['C']}, 'B': {'1': ['C'], '0': ['D']}, 'C': {'0': ['B'], '1': ['D']}, 'D': {'0': ['D'], '1': ['D']}}}
-
-mine = {
-    STATES: ['a', 'b', 'c', 'd', 'e', 'f'],
-    INITIAL: 'a',
-    ACCEPT: ['c', 'd', 'e'],
-    TRANSITIONS: {
-        'a': {
-            '0': ['b'],
-            '1': ['d']
-        },
-        'b': {
-            '0': ['a'],
-            '1': ['c']
-        },
-        'c': {
-            '0': ['e'],
-            '1': ['f']
-        },
-        'd': {
-            '0': ['e'],
-            '1': ['f']
-        },
-        'e': {
-            '0': ['e'],
-            '1': ['f']
-        },
-        'f': {
-            '0': ['f'],
-            '1': ['f']
-        }
-    }
-}
-
-# intersection(fa,fb)
-# print(fa)
-# print(nfaToDfa(fa))
-#readInputFile()
-# print(formalDef)
-# print(nfaToDfa(formalDef))
-
-# print(minimization(mine))
-
-#handleInput()
+handleInput()
