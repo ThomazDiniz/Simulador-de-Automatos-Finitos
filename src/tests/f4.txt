@@ -1,16 +1,10 @@
-estados A, B, C, D, E, F, G, N, Z
-inicial A
-aceita B, A, G
-A B e
-A C e
-A D e
-A A 1
-B B 1
-C E 0
-E F 1
-F G 0
-G A 0
-B G e
-G F e
-B N e
-B Z e
+estados a, b, c
+inicial b
+aceita c
+a b 0
+a c 1
+b b 0
+b b 1
+b a 1
+c b 0
+c b 1
