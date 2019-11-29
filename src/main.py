@@ -372,17 +372,34 @@ def automataAddTransiton(formalDef,state,symbol,resultState):
 # requires two formal definitions of automata
 def union(formalDefA, formalDefB):
     newFormalDef = {
-        STATES: formalDefA[STATES] + formalDefB[STATES],
+        STATES: ['NEW_STATE'],
         INITIAL: 'NEW_STATE',
-        ACCEPT: formalDefA[ACCEPT] + formalDefB[ACCEPT],
-        TRANSITIONS: formalDefA[TRANSITIONS]
+        ACCEPT: [],
+        TRANSITIONS: {}
     }
 
-    newFormalDef[STATES].append(newFormalDef[INITIAL])
+    # RENAME STATES
+    newFormalDef[STATES] = newFormalDef[STATES] + list(map(lambda oldState: '1_' + oldState, formalDefA[STATES]))
+    newFormalDef[STATES] = newFormalDef[STATES] + list(map(lambda oldState: '2_' + oldState, formalDefB[STATES]))
 
-    newFormalDef[TRANSITIONS].update(formalDefB[TRANSITIONS])
+    # RENAME ACCEPT
+    newFormalDef[ACCEPT] = newFormalDef[ACCEPT] + list(map(lambda oldState: '1_' + oldState, formalDefA[ACCEPT]))
+    newFormalDef[ACCEPT] = newFormalDef[ACCEPT] + list(map(lambda oldState: '2_' + oldState, formalDefB[ACCEPT]))
+
+    # RENAME TRANSITIONS
+    for state in formalDefA[TRANSITIONS].keys():
+        newFormalDef[TRANSITIONS]['1_' + state] = {}
+        for symbol in formalDefA[TRANSITIONS][state]:
+            newFormalDef[TRANSITIONS]['1_' + state][symbol] = list(map(lambda oldState: '1_' + oldState, formalDefA[TRANSITIONS][state][symbol]))
+
+    for state in formalDefB[TRANSITIONS].keys():
+        newFormalDef[TRANSITIONS]['2_' + state] = {}
+        for symbol in formalDefB[TRANSITIONS][state]:
+            newFormalDef[TRANSITIONS]['2_' + state][symbol] = list(map(lambda oldState: '2_' + oldState, formalDefB[TRANSITIONS][state][symbol]))
+
+    # ADD NEW STATE TRASITION
     newFormalDef[TRANSITIONS][newFormalDef[INITIAL]] = {
-        'e': [formalDefA[INITIAL], formalDefB[INITIAL]]
+        'e': ['1_' + formalDefA[INITIAL], '2_' + formalDefB[INITIAL]]
     }
 
     return newFormalDef
