@@ -27,36 +27,42 @@ def _getNotFinalStates(formalDef):
     return notFinalStates
 
 
+def _getNthEquivalentStates(formalDef):
+    notFinalStates = _getNotFinalStates(formalDef)
+    finalStates = formalDef[ACCEPT][:]
+    remainingStates = notFinalStates[:]
+    alphabet = getAlphabet(formalDef)
+    transitions = formalDef[TRANSITIONS]
+    result = [finalStates[:]]
+    while remainingStates != []:
+        nextFinal = set()
+        previousRemainingStates = remainingStates[:]
+        #finding nth-distance from final state
+        for state in remainingStates:
+            for symbol in alphabet:
+                for nextState in transitions[state][symbol]:
+                    if nextState in finalStates:
+                        nextFinal.add(state)
+
+        #remove from remaining states and append to result
+        for state in nextFinal:
+            if state in remainingStates:
+                remainingStates.remove(state)
+            finalStates.append(state)
+            
+        if nextFinal!=set():
+            result.append(nextFinal)
+        #cases where it doesn't end
+        if previousRemainingStates == remainingStates:
+            result.append(remainingStates)
+            break
+        
+    return result
+
+
 # _minimalStates calculates the minimal states for the automaton given
 def _minimalStates(formalDef):
-    formalDef = removeUnreachableStates(formalDef)
-    notFinalStates = _getNotFinalStates(formalDef)
-    finalStates = formalDef[ACCEPT]
-    sets = [notFinalStates, finalStates]
-    currentSets = []
-    transitios = formalDef[TRANSITIONS]
-    alphabet = getAlphabet(formalDef)
-    while currentSets == []:
-        currentSets = sets
-        sets = []
-        for subSet in currentSets:
-            isDivided = False
-            for symbol in alphabet:
-                into = []
-                outo = []
-                for state in subSet:
-                    try:
-                        if transitios[state][symbol][0] in finalStates: into.append(state)
-                        else: outo.append(state)
-                    except KeyError:
-                        outo.append(state)
-                if into != [] and outo != []:
-                    sets.append(into)
-                    sets.append(outo)
-                    isDivided = True
-                    break
-            if not isDivided:
-                sets.append(subSet)
+    sets = _getNthEquivalentStates(formalDef)
     return list(map(lambda x: ''.join(x), sets))
 
 # _getInitialState calculates the new initial state for the minimal automaton
