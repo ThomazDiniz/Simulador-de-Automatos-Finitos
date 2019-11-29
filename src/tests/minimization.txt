@@ -1,0 +1,15 @@
+estados a, b, c, d, e, f
+inicial a
+aceita c, d, e
+a b 0
+a d 1
+b a 0
+b c 1
+c e 0
+c f 1
+d e 0
+d f 1
+e e 0
+e f 1
+f f 0
+f f 1
