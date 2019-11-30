@@ -180,20 +180,15 @@ def readAutomataFile(filePath):
 # requires the formal definition of the automaton
 def simulate(formalDef):
     word = sys.argv[2]
-    toProcess = deque([])
-    toProcess.append(formalDef[INITIAL])
-
-    print('ESTADO', '\t', 'PALAVRA')
-    print(formalDef[INITIAL], '\t', word)
-    while(len(word) > 0 and len(toProcess) > 0):
-        currentState = toProcess.popleft()
+    currentStates = [formalDef[INITIAL]]
+    print('{0:<60} {1:<}'.format('ESTADO','PALAVRA'))
+    print('{0:<60} {1:<}'.format(formalDef[INITIAL], word))
+    while(len(word) > 0):
         symbol = word[0]
         word = word[1:len(word)]
-        if (symbol in formalDef[TRANSITIONS][currentState]):
-            for nextState in formalDef[TRANSITIONS][currentState][symbol]:
-                toProcess.append(nextState)
-                print(nextState, '\t', word if len(word) > 0 else 'e')
-    showVeredict(formalDef, toProcess)
+        currentStates = nfaTraverse(formalDef,currentStates,symbol)
+        print('{0:<60} {1:<}'.format(', '.join(str(state) for state in currentStates), word if len(word) > 0 else 'e'))
+    showVeredict(formalDef, currentStates)
 
 
 # showVeredict receives a list with the states the automaton stops
@@ -212,11 +207,14 @@ def showVeredict(formalDef, states):
 # it returns a formal definition for the complement automaton.
 # requires the formal definition of the automaton
 def generateComplement(formalDef):
+    formalDef = nfaToDfa(formalDef)
+    print(formalDef)
     complementDef = {}
     complementDef[INITIAL] = formalDef[INITIAL]
     complementDef[TRANSITIONS] = formalDef[TRANSITIONS].copy()
     complementDef[STATES] = formalDef[STATES][:]
     complementDef[ACCEPT] = list(set(formalDef[STATES]) - set(formalDef[ACCEPT]))
+    print(complementDef)
     return complementDef
 
 

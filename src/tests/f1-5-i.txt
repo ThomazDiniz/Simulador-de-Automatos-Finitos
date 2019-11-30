@@ -1,0 +1,11 @@
+estados A_A, A_B, B_A, B_B
+inicial A_A
+aceita B_B
+A_A A_B 1
+A_A B_A 0
+A_B A_A 1
+A_B B_B 0
+B_A B_B 1
+B_A A_A 0
+B_B B_A 1
+B_B A_B 0

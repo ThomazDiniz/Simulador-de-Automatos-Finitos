@@ -1,0 +1,13 @@
+estados A, 1_A, 1_B, 2_A, 2_B
+inicial A
+aceita 1_B, 2_B
+1_A 1_B 0
+1_A 1_A 1
+1_B 1_A 0
+1_B 1_B 1
+2_A 2_B 1
+2_A 2_A 0
+2_B 2_A 1
+2_B 2_B 0
+A 2_A e
+A 1_A e
