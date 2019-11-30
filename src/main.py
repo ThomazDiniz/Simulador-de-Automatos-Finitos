@@ -208,13 +208,11 @@ def showVeredict(formalDef, states):
 # requires the formal definition of the automaton
 def generateComplement(formalDef):
     formalDef = nfaToDfa(formalDef)
-    print(formalDef)
     complementDef = {}
     complementDef[INITIAL] = formalDef[INITIAL]
     complementDef[TRANSITIONS] = formalDef[TRANSITIONS].copy()
     complementDef[STATES] = formalDef[STATES][:]
     complementDef[ACCEPT] = list(set(formalDef[STATES]) - set(formalDef[ACCEPT]))
-    print(complementDef)
     return complementDef
 
 
