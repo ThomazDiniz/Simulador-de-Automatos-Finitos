@@ -1,0 +1,8 @@
+estados A, B, C, D
+inicial A
+aceita C, D
+A A 0
+A A 1
+A B e
+B C 0
+B D 1

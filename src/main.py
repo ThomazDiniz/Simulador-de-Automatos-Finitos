@@ -32,6 +32,7 @@ def _getNthEquivalentStates(formalDef):
     finalStates = formalDef[ACCEPT][:]
     remainingStates = notFinalStates[:]
     alphabet = getAlphabet(formalDef)
+    alphabet.add('e')
     transitions = formalDef[TRANSITIONS]
     result = [finalStates[:]]
     while remainingStates != []:
@@ -40,9 +41,13 @@ def _getNthEquivalentStates(formalDef):
         #finding nth-distance from final state
         for state in remainingStates:
             for symbol in alphabet:
-                for nextState in transitions[state][symbol]:
-                    if nextState in finalStates:
-                        nextFinal.add(state)
+                for transition in transitions[state]:
+                    try:
+                        nextState = transition[symbol]
+                        if nextState in finalStates:
+                            nextFinal.add(state)
+                    except:
+                        pass
 
         #remove from remaining states and append to result
         for state in nextFinal:
@@ -56,7 +61,6 @@ def _getNthEquivalentStates(formalDef):
         if previousRemainingStates == remainingStates:
             result.append(remainingStates)
             break
-        
     return result
 
 
@@ -93,10 +97,11 @@ def _getTransitions(formalDef, minimalStates):
         for symbol in alphabet:
             nextStates = []
             for s in list(state):
-                for b in formalDef[TRANSITIONS][s][symbol]:
-                    for nextState in minimalStates:
-                        if b in nextState: 
-                            nextStates.append(nextState)
+                if s in formalDef[TRANSITIONS]:
+                    for b in formalDef[TRANSITIONS][s][symbol]:
+                        for nextState in minimalStates:
+                            if b in nextState: 
+                                nextStates.append(nextState)
             transitions[state][symbol] = list(set(nextStates))
     return transitions
 
@@ -124,25 +129,18 @@ def handleInput():
 
     result = ''
     if operation == OP_UNION:
-        print('Operação de União:')
         result = union(automatas[0], automatas[1])
     elif operation == OP_INTERSECTION:
-        print('Operação de Intersecção:')
         result = intersection(automatas[0],automatas[1])
     elif operation == OP_DFACONVERSION:
-        print('Operação conversão NFA para DFA:')
         result = nfaToDfa(automatas[0])
     elif operation == OP_STAR:
-        print('Operação Estrela:')
         result = starOperation(automatas[0])
     elif operation == OP_COMPLEMENT:
-        print('Operação Complemento:')
         result = generateComplement(automatas[0])
     elif operation == OP_MINIMIZATION:
-        print('Operação Minimização:')
         result = minimization(automatas[0])
     else:
-        print('Operação de Simulação:')
         simulate(automatas[0])
         
     if operation != '':
